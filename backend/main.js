@@ -80,3 +80,37 @@ app.post("/v1/users", (request, response) => {
         }
     });
 })
+
+// RECIPES ENDPOINTS
+app.get("/v1/recipes", (request, response) => {
+    pool.query(`SELECT title, description, cooking_time, instructions, CONCAT(Users.fname, ' ', Users.lname) AS user from Recipes 
+JOIN Users on Users.user_id = Recipes.user ORDER BY recipe_id`, [], (error, result) => {
+        if (error) {
+            response.status(500).json({ error: "Error fetching data" });
+        }
+        else {
+            response.json(
+                {
+                    status: "success",
+                    data: result
+                }
+            )
+        }
+    });
+});
+
+app.post("/v1/recipes", (request, response) => {
+    const { title, description, cooking_time, instructions, user_id } = request.body;
+    pool.query("INSERT INTO Recipes (title, description, cooking_time, instructions, user, created_at) VALUES (?, ?, ?, ?, ?, NOW())", [title, description, cooking_time, instructions, user_id], (error, result) => {
+        if (error) {
+            response.status(500).json({ error: error.message });
+        } else {
+            response.json(
+                {
+                    status: "success",
+                    message: "New recipe added successfully"
+                }
+            )
+        }
+    });
+});
