@@ -64,3 +64,19 @@ app.get("/v1/users", (request, response) => {
         )
     });
 })
+
+app.post("/v1/users", (request, response) => {
+    const { fname, lname, email, password_hash } = request.body;
+    pool.query("INSERT INTO Users (fname, lname, email, password_hash, created_at) VALUES (?, ?, ?, ?, NOW())", [fname, lname, email, password_hash], (error, result) => {
+        if (error) {
+            response.status(500).json({ error: "Error inserting data" });
+        } else {
+            response.json(
+                {
+                    status: "success",
+                    message: "New user added successfully"
+                }
+            )
+        }
+    });
+})
