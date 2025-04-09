@@ -37,7 +37,7 @@ app.listen(port, () => {
 app.get('/', (request, response) => {
     response.json(
         {
-            info: 'Backend for GBC Library, set up by Chris K!'
+            info: 'Backend for my first endpoint using my database by Samin L'
         }
     )
 })
