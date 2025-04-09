@@ -1,3 +1,15 @@
+// connect to sql database
+const mysql = require('mysql2');
+require('dotenv').config()
+
+// create connection to database
+const pool = mysql.createPool({
+    host: process.env.SQL_HOSTNAME,
+    user: process.env.SQL_USERNAME,
+    password: process.env.SQL_PASSWORD,
+    database: process.env.SQL_DBNAME,
+});
+
 // Set up the API
 const express = require('express')
 var cors = require('cors');
@@ -40,4 +52,15 @@ app.get('/', (request, response) => {
             info: 'Backend for my first endpoint using my database by Samin L'
         }
     )
+})
+
+app.get("/v1/users", (request, response) => {
+    pool.query("select fname, lname, email from Users ORDER BY user_id", [], (error, result) => {
+        response.json(
+            {
+                status: "success",
+                data: result
+            }
+        )
+    });
 })
