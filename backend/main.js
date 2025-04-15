@@ -154,3 +154,41 @@ app.post("/v1/ratings", (request, response) => {
     );
 });
 
+// FAVORITES ENDPOINTS
+app.get("/v1/favorites", (request, response) => {
+    const { user_id } = request.query;
+    pool.query(`SELECT Recipes.title, Recipes.description FROM Favorites
+JOIN Recipes ON Recipes.recipe_id = Favorites.recipe 
+WHERE Favorites.user = ? ORDER BY Favorites.favorite_id`, [user_id], (error, result) => {
+        if (error) {
+            response.status(500).json({ error: "Error fetching data" });
+        }
+        else {
+            response.json(
+                {
+                    status: "success",
+                    data: result
+                }
+            )
+        }
+    });
+});
+
+app.post("/v1/favorites", (request, response) => {
+    const { user_id, recipe_id } = request.body;
+    pool.query(`INSERT INTO Favorites (user, recipe)
+        VALUES (?, ?)`, [user_id, recipe_id], (error, result) => {
+        if (error) {
+            response.status(500).json({ error: error.message });
+        }
+        else {
+            response.json(
+                {
+                    status: "success",
+                    message: "New favorite added successfully"
+                }
+            )
+        }
+    });
+});
+
