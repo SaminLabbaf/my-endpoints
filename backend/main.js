@@ -99,6 +99,55 @@ JOIN Users on Users.user_id = Recipes.user ORDER BY recipe_id`, [], (error, resu
     });
 });
 
+app.get("/v1/recipes/:id", (request, response) => {
+    const id = request.params.id;
+    const query = `SELECT 
+    Recipes.recipe_id,
+    Recipes.title, 
+    Recipes.description, 
+    Recipes.cooking_time, 
+    Recipes.instructions,
+    CONCAT(Users.fname, ' ', Users.lname) AS user,
+    Recipes.created_at,
+    COALESCE(
+        JSON_ARRAYAGG(
+            CASE 
+                WHEN Ingredients.ingredient_id IS NOT NULL THEN
+                    JSON_OBJECT(
+                        'ingredient_id', Ingredients.ingredient_id,
+                        'name', Ingredients.name,
+                        'unit', Recipe_Ingredient.unit,
+                        'amount', Recipe_Ingredient.quantity
+                    )
+                ELSE NULL
+            END
+        ),
+        JSON_ARRAY()
+    ) AS ingredients
+FROM Recipes
+JOIN Users ON Recipes.user = Users.user_id
+LEFT JOIN Recipe_Ingredient ON Recipe_Ingredient.recipe = Recipes.recipe_id
+LEFT JOIN Ingredients ON Ingredients.ingredient_id = Recipe_Ingredient.ingredient
+WHERE Recipes.recipe_id = ?
+GROUP BY Recipes.recipe_id;`
+    pool.query(query, [id], (error, result) => {
+        if (error) {
+            response.status(500).json({ error: "Error fetching data" });
+        }
+        else {
+            response.json(
+                {
+                    status: "success",
+                    data: result
+                }
+            )
+        }
+    });
+});
+
+
+
+
 app.post("/v1/recipes", (request, response) => {
     const { title, description, cooking_time, instructions, user_id } = request.body;
     pool.query("INSERT INTO Recipes (title, description, cooking_time, instructions, user, created_at) VALUES (?, ?, ?, ?, ?, NOW())", [title, description, cooking_time, instructions, user_id], (error, result) => {
