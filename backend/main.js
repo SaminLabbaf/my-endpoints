@@ -145,6 +145,38 @@ GROUP BY Recipes.recipe_id;`
     });
 });
 
+app.post('/v1/recipes/:id/ingredients', (request, response) => {
+    const recipeId = request.params.id;
+    const ingredients = request.body.ingredients;
+
+    if (!Array.isArray(ingredients) || ingredients.length === 0) {
+        return response.status(400).json({ error: 'No ingredients provided' });
+    }
+
+    // Loop through the ingredients and insert each one
+    ingredients.forEach((ingredient, index) => {
+        pool.query(
+            'INSERT INTO Recipe_Ingredient (recipe, ingredient, quantity, unit) VALUES (?, ?, ?, ?)',
+            [recipeId, ingredient.ingredient_id, ingredient.quantity, ingredient.unit],
+            (error, result) => {
+                if (error) {
+                    // If there's an error, send the response with the error and break the loop
+                    return response.status(500).json({ error: 'Failed to add ingredient', details: error });
+                }
+
+                // If it's the last ingredient, respond with a success message
+                if (index === ingredients.length - 1) {
+                    response.status(201).json({
+                        status: 'success',
+                        data: 'Ingredients added successfully to the recipe'
+                    });
+                }
+            }
+        );
+    });
+});
+
+
 
 
 
@@ -163,6 +195,36 @@ app.post("/v1/recipes", (request, response) => {
         }
     });
 });
+
+// INGREDIENTS ENDPOINTS
+app.get("/v1/ingredients", (request, response) => {
+    pool.query("SELECT * FROM Ingredients", (error, result) => {
+        if (error) {
+            response.status(500).json({ error: "Error fetching data" });
+        }
+        else {
+            response.json({
+                status: "success",
+                data: result
+            });
+        }
+    });
+})
+
+app.post("/v1/ingredients", (request, response) => {
+    const { name } = request.body;
+    pool.query("INSERT INTO Ingredients (name) VALUES (?)", [name], (error, result) => {
+        if (error) {
+            response.status(500).json({ error: "Error fetching data" });
+        }
+        else {
+            response.json({
+                status: "success",
+                data: "New ingredient added successfully"
+            });
+        }
+    });
+})
 
 // RATINGS ENDPOINTS
 app.get("/v1/ratings", (request, response) => {
