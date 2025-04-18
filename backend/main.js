@@ -176,6 +176,22 @@ app.post('/v1/recipes/:id/ingredients', (request, response) => {
     });
 });
 
+app.get("/v1/recipes/:id/ratings", (request, response) => {
+    const recipeId = request.params.id;
+    const query = `SELECT CONCAT(Users.fname, ' ', Users.lname) AS user, rating, comment 
+    FROM Ratings JOIN Users ON Users.user_id = Ratings.user
+JOIN Recipes ON Recipes.recipe_id = Ratings.recipe WHERE recipe_id = ?`;
+    pool.query(query, [recipeId], (error, result) => {
+        if (error) {
+            return response.status(500).json({ error: "Error fetching data" });
+        }
+        response.json({
+            status: "success",
+            data: result
+        });
+    });
+})
+
 
 
 
@@ -229,8 +245,8 @@ app.post("/v1/ingredients", (request, response) => {
 // RATINGS ENDPOINTS
 app.get("/v1/ratings", (request, response) => {
     pool.query(`SELECT CONCAT(Users.fname, ' ', Users.lname) AS user, Recipes.title AS recipe , rating, comment from Ratings 
-JOIN Users on Users.user_id = Ratings.user
-JOIN Recipes on Recipes.recipe_id = Ratings.recipe ORDER BY rating_id`, [], (error, result) => {
+JOIN Users ON Users.user_id = Ratings.user
+JOIN Recipes ON Recipes.recipe_id = Ratings.recipe ORDER BY rating_id`, [], (error, result) => {
         if (error) {
             response.status(500).json({ error: "Error fetching data" });
         }
