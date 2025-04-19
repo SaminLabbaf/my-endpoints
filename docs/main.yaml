@@ -1,0 +1,290 @@
+openapi: "3.1.1"
+info:
+  title: My Recipes API
+  version: "1.0"
+servers:
+  - url: http://localhost:3007/v1
+tags:
+  - name: users
+    description: Operations about users
+  - name: recipes
+    description: Everything about recipes
+paths:
+  /users:
+    get:
+      tags:
+        - users
+      description: "Lists all users in the recipe app"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - users
+      description: "Creates a new user in the recipe app"
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  default: "John"
+                last_name:
+                  type: string
+                  default: "Doe"
+                email:
+                  type: string
+                  default: "user@example.com"
+                password:
+                  type: string
+                  default: "password"
+              required:
+                - first_name
+                - last_name
+                - email
+                - password
+      responses:
+        "200":
+          description: OK
+  /recipes:
+    get:
+      tags:
+        - recipes
+      description: "Lists all recipes in the recipe app"
+      responses:
+        "200":
+          description: OK
+  /recipes/{id}:
+    get:
+      tags:
+        - recipes
+      summary: Get a recipe by ID
+      description: Gets single recipe information in the recipe app
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the recipe to retrieve
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - recipes
+      summary: Create a new recipe
+      description: Submit a new recipe using form data
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  default: cheesecake
+                description:
+                  type: string
+                  default: cake made out of cheese!
+                cooking_time:
+                  type: integer
+                  default: 20
+                instructions:
+                  type: string
+                  default: put cheese inside the cake!
+                user_id:
+                  type: integer
+                  default: 13
+              required:
+                - title
+                - description
+                - cooking_time
+                - instructions
+                - user_id
+      responses:
+        "200":
+          description: OK
+  /recipes/{id}/ingredients:
+    post:
+      tags:
+        - recipes
+      description: Adds a list of ingredients with quantity and unit to a specific recipe
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the recipe
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ingredients:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      ingredient_id:
+                        type: integer
+                        example: 23
+                      quantity:
+                        type: number
+                        example: 1
+                      unit:
+                        type: string
+                        example: count
+                  example:
+                    - ingredient_id: 23
+                      quantity: 1
+                      unit: count
+                    - ingredient_id: 21
+                      quantity: 300
+                      unit: grams
+              required:
+                - ingredients
+              example:
+                ingredients:
+                  - ingredient_id: 23
+                    quantity: 1
+                    unit: count
+                  - ingredient_id: 21
+                    quantity: 300
+                    unit: grams
+      responses:
+        "200":
+          description: OK
+  /recipes/{id}/ratings:
+    get:
+      tags:
+        - recipes
+      description: Retrieves a list of all ratings for a specific recipe
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the recipe
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: OK
+  /ratings:
+    get:
+      tags:
+        - ratings
+      summary: Get all ratings
+      description: Retrieves a list of all ratings in the system
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - ratings
+      description: Submits a new rating for a recipe
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  example: 12
+                recipe_id:
+                  type: integer
+                  example: 11
+                rating:
+                  type: number
+                  example: 5
+                comment:
+                  type: string
+                  example: "So yummy and easy to make - cheescake hack! :)"
+              required:
+                - user_id
+                - recipe_id
+                - rating
+      responses:
+        "200":
+          description: OK
+  /favorites:
+    get:
+      tags:
+        - favorites
+      description: Retrieves the list of favorite recipes based on user ID
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          description: ID of the user
+          schema:
+            type: integer
+            example: 10
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - favorites
+      summary: Add a recipe to user favorites
+      description: Adds a specific recipe to the user's list of favorites
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  example: 12
+                recipe_id:
+                  type: integer
+                  example: 11
+              required:
+                - user_id
+                - recipe_id
+      responses:
+        "200":
+          description: OK
+  /ingredients:
+    get:
+      tags:
+        - ingredients
+      summary: Get all ingredients
+      description: Retrieves all available ingredients
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - ingredients
+      summary: Add a new ingredient
+      description: Adds a new ingredient to the system
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: cake
+              required:
+                - name
+      responses:
+        "200":
+          description: OK

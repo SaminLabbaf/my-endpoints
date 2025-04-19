@@ -1,6 +1,7 @@
 // connect to sql database
 const mysql = require('mysql2');
 require('dotenv').config()
+const bcrypt = require('bcrypt');
 
 // create connection to database
 const pool = mysql.createPool({
@@ -66,8 +67,9 @@ app.get("/v1/users", (request, response) => {
 })
 
 app.post("/v1/users", (request, response) => {
-    const { fname, lname, email, password_hash } = request.body;
-    pool.query("INSERT INTO Users (fname, lname, email, password_hash, created_at) VALUES (?, ?, ?, ?, NOW())", [fname, lname, email, password_hash], (error, result) => {
+    const { first_name, last_name, email, password } = request.body;
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    pool.query("INSERT INTO Users (fname, lname, email, password_hash, created_at) VALUES (?, ?, ?, ?, NOW())", [first_name, last_name, email, hashedPassword], (error, result) => {
         if (error) {
             response.status(500).json({ error: "Error inserting data" });
         } else {
